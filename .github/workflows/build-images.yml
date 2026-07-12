@@ -44,3 +44,37 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: ./cryptonode-zano
+          platforms: linux/amd64
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.REPO_LC }}/zano-node:latest
+            ${{ env.REGISTRY }}/${{ env.REPO_LC }}/zano-node:2.2.1.502
+
+  build-zano-status:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Repo-Namen in Kleinbuchstaben ermitteln
+        run: echo "REPO_LC=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> "$GITHUB_ENV"
+
+      - uses: docker/setup-qemu-action@v3
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: docker/build-push-action@v6
+        with:
+          context: ./cryptonode-zano/status
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.REPO_LC }}/zano-status:latest
+            ${{ env.REGISTRY }}/${{ env.REPO_LC }}/zano-status:1.0.0
