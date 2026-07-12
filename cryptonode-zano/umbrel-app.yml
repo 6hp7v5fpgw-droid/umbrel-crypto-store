@@ -2,7 +2,7 @@ manifestVersion: 1
 id: cryptonode-zano
 category: Crypto
 name: Zano Node
-version: "2.1.17.469"
+version: "v2.2.1.502"
 tagline: Voll validierender Zano-Knoten, dessen P2P-Verkehr über Tor läuft
 description: >-
   Betreibt einen eigenen, voll validierenden Knoten für Zano (ZANO), eine
