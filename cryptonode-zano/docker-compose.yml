@@ -17,7 +17,7 @@ services:
   # Kleine Status-Weboberfläche (Höhe, Peers, Tor-Status). Sie spricht den
   # zanod-RPC-Port nur intern an, nie direkt über app_proxy.
   web:
-    image: ghcr.io/OWNER/REPO/zano-status:1.0.0
+    image: ghcr.io/6hp7v5fpgw-droid/REPO/zano-status:1.0.0
     user: "1000:1000"
     restart: on-failure
     environment:
@@ -31,7 +31,7 @@ services:
   # Der eigentliche Zano-Daemon. Kein Host-Port wird published - RPC ist nur
   # innerhalb des Umbrel-Docker-Netzes für den "web"-Service erreichbar.
   zanod:
-    image: ghcr.io/OWNER/REPO/zano-node:2.1.17.469
+    image: ghcr.io/6hp7v5fpgw-droid/REPO/zano-node:2.1.17.469
     restart: on-failure
     init: true
     user: "1000:1000"
