@@ -31,7 +31,7 @@ services:
   # Der eigentliche Zano-Daemon. Kein Host-Port wird published - RPC ist nur
   # innerhalb des Umbrel-Docker-Netzes für den "web"-Service erreichbar.
   zanod:
-    image: ghcr.io/6hp7v5fpgw-droid/umbrel-crypto-store/zano-node:2.1.17.469
+    image: ghcr.io/6hp7v5fpgw-droid/umbrel-crypto-store/zano-node:v2.2.1.502
     restart: on-failure
     init: true
     user: "1000:1000"
