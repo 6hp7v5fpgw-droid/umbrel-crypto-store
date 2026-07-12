@@ -1,5 +1,14 @@
 name: Build & publish app images
 
+# Baut das Docker-Image fuer den Zano-Node (Basis: offizielles
+# zanoproject/zano-full-node-Image + torsocks-Layer) und die
+# Status-Weboberflaeche, und veroeffentlicht beide auf ghcr.io, damit
+# docker-compose.yml in cryptonode-zano/ sie referenzieren kann.
+#
+# Voraussetzung: In den Repo-Einstellungen unter Settings > Actions >
+# General > Workflow permissions muss "Read and write permissions" aktiv
+# sein, damit der automatische GITHUB_TOKEN nach ghcr.io pushen darf.
+
 on:
   push:
     branches: [main, master]
@@ -8,29 +17,14 @@ on:
       - "cryptonode-zano/docker-entrypoint.sh"
       - "cryptonode-zano/status/**"
       - ".github/workflows/build-images.yml"
-  workflow_dispatch:
-    inputs:
-      zano_ref:
-        description: "Zano git tag/branch (siehe https://github.com/hyle-team/zano/releases)"
-        required: false
-        default: "v2.2.1.502"
+  workflow_dispatch: {}
 
 env:
   REGISTRY: ghcr.io
 
 jobs:
   build-zano-node:
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - platform: linux/amd64
-            runner: ubuntu-24.04
-            suffix: amd64
-          - platform: linux/arm64
-            runner: ubuntu-24.04-arm
-            suffix: arm64
-    runs-on: ${{ matrix.runner }}
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
       packages: write
@@ -46,64 +40,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build & push (${{ matrix.platform }})
+      - name: Build & push
         uses: docker/build-push-action@v6
         with:
-          context: ./cryptonode-zano
-          build-args: |
-            ZANO_REF=${{ github.event.inputs.zano_ref || 'v2.1.17.469' }}
-          platforms: ${{ matrix.platform }}
-          push: true
-          tags: ${{ env.REGISTRY }}/${{ env.REPO_LC }}/zano-node:${{ matrix.suffix }}
-
-  publish-zano-node-manifest:
-    needs: build-zano-node
-    runs-on: ubuntu-24.04
-    permissions:
-      packages: write
-    steps:
-      - name: Repo-Namen in Kleinbuchstaben ermitteln
-        run: echo "REPO_LC=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> "$GITHUB_ENV"
-
-      - uses: docker/login-action@v3
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Multi-Arch-Manifest zusammenfuehren
-        run: |
-          docker buildx imagetools create \
-            -t ${{ env.REGISTRY }}/${{ env.REPO_LC }}/zano-node:latest \
-            -t ${{ env.REGISTRY }}/${{ env.REPO_LC }}/zano-node:2.1.17.469 \
-            ${{ env.REGISTRY }}/${{ env.REPO_LC }}/zano-node:amd64 \
-            ${{ env.REGISTRY }}/${{ env.REPO_LC }}/zano-node:arm64
-
-  build-zano-status:
-    runs-on: ubuntu-24.04
-    permissions:
-      contents: read
-      packages: write
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Repo-Namen in Kleinbuchstaben ermitteln
-        run: echo "REPO_LC=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> "$GITHUB_ENV"
-
-      - uses: docker/setup-qemu-action@v3
-      - uses: docker/setup-buildx-action@v3
-
-      - uses: docker/login-action@v3
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - uses: docker/build-push-action@v6
-        with:
-          context: ./cryptonode-zano/status
-          platforms: linux/amd64,linux/arm64
-          push: true
-          tags: |
-            ${{ env.REGISTRY }}/${{ env.REPO_LC }}/zano-status:latest
-            ${{ env.REGISTRY }}/${{ env.REPO_LC }}/zano-status:1.0.0
+          context:
