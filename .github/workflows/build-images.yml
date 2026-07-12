@@ -43,4 +43,4 @@ jobs:
       - name: Build & push
         uses: docker/build-push-action@v6
         with:
-          context:
+          context: ./cryptonode-zano
