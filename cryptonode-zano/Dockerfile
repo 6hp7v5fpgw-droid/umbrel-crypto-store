@@ -42,7 +42,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
       libboost-all-dev libssl-dev libicu-dev libbz2-dev zlib1g-dev \
       torsocks ca-certificates \
     && rm -rf /var/lib/apt/lists/* \
-    && useradd -u 1000 -m -s /usr/sbin/nologin zano \
+    && (id -u 1000 >/dev/null 2>&1 || useradd -u 1000 -m -s /usr/sbin/nologin zano) \
     && mkdir -p /data && chown -R 1000:1000 /data
 
 COPY --from=builder /out/zanod /usr/local/bin/zanod
