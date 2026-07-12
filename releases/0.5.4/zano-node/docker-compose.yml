@@ -1,0 +1,74 @@
+version: '3.9'
+
+services:
+  tor:
+    image: alpine:3.19
+    container_name: zano-tor
+    restart: always
+    networks:
+      - zano-net
+    volumes:
+      - tor-data:/var/lib/tor
+    command:
+      - sh
+      - -c
+      - |
+        apk add --no-cache tor su-exec &&
+        mkdir -p /var/lib/tor/zano_hs &&
+        chmod 700 /var/lib/tor/zano_hs &&
+        chown -R tor:tor /var/lib/tor &&
+        cat > /etc/tor/torrc << 'TORRC'
+        SOCKSPort 0.0.0.0:9050
+        SOCKSPolicy accept 172.36.0.0/24
+        SOCKSPolicy reject *
+        ExitPolicy reject *:*
+        DataDirectory /var/lib/tor
+        HiddenServiceDir /var/lib/tor/zano_hs/
+        HiddenServicePort 11211 172.36.0.3:11211
+        HiddenServiceVersion 3
+        SafeLogging 1
+        TORRC
+        exec su-exec tor tor -f /etc/tor/torrc
+
+  zano:
+    image: zanohq/zano:latest
+    container_name: zano-node
+    restart: always
+    depends_on:
+      - tor
+    networks:
+      - zano-net
+    volumes:
+      - zano-data:/root/.zano
+    environment:
+      ZANO_PROXY: tor:9050
+    command:
+      - sh
+      - -c
+      - |
+        zanod \
+          --data-dir=/root/.zano \
+          --rpc-bind-ip=0.0.0.0 \
+          --rpc-bind-port=11211 \
+          --confirm-external-bind \
+          --proxy=socks5://tor:9050 \
+          --hide-my-port \
+          --offline
+    ports:
+      - "127.0.0.1:11211:11211"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11211/json_rpc"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+volumes:
+  tor-data:
+  zano-data:
+
+networks:
+  zano-net:
+    ipam:
+      config:
+        - subnet: 172.36.0.0/24
