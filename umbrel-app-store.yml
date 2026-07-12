@@ -1,0 +1,2 @@
+id: "cryptonode" # Nur Kleinbuchstaben ("a-z") und Bindestriche ("-"). Muss Prefix jeder App-ID in diesem Store sein.
+name: "Crypto Node Store" # Erscheint in der Umbrel-UI als "<name> App Store".
