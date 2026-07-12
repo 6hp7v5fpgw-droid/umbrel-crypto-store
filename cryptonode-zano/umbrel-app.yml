@@ -1,6 +1,6 @@
 manifestVersion: 1
 id: cryptonode-zano
-category: Finance
+category: Crypto
 name: Zano Node
 version: "2.1.17.469"
 tagline: Voll validierender Zano-Knoten, dessen P2P-Verkehr über Tor läuft
