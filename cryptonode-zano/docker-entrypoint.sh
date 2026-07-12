@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-DATA_DIR="/data"
+DATA_DIR="/home/zano/.Zano"
 RPC_PORT="${ZANO_RPC_PORT:-11211}"
 P2P_PORT="${ZANO_P2P_PORT:-11121}"
 
@@ -18,14 +18,13 @@ fi
 
 # p2p-bind bewusst auf localhost: dieser Knoten nimmt keine eingehenden
 # P2P-Verbindungen an (privater Knoten, kein oeffentlicher Relay).
-exec "${RUNNER[@]}" zanod \
+exec "${RUNNER[@]}" /home/zano/zanod \
   --data-dir="${DATA_DIR}" \
   --rpc-bind-ip=0.0.0.0 \
   --rpc-bind-port="${RPC_PORT}" \
   --p2p-bind-ip=127.0.0.1 \
   --p2p-bind-port="${P2P_PORT}" \
   --hide-my-port \
-  --log-file="${DATA_DIR}/zano.log" \
-  --log-console-level=1 \
-  --console \
+  --disable-upnp \
+  --log-level=1 \
   "$@"
