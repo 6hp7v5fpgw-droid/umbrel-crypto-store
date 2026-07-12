@@ -6,7 +6,7 @@
 #
 FROM ubuntu:24.04 AS builder
 
-ARG ZANO_REF=v2.1.17.469
+ARG ZANO_REF=v2.2.1.502
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Ubuntu 24.04 liefert Boost 1.83 und OpenSSL 3.0.x - beides liegt innerhalb
